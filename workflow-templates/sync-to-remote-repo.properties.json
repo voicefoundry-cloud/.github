@@ -1,0 +1,5 @@
+{
+  "name": "Sync to Remote Repository",
+  "description": "On push, uses SSH to sync changes to a remote git repository.",
+  "iconName": "sync"
+}
