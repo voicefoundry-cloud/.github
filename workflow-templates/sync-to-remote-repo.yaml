@@ -1,0 +1,46 @@
+name: Sync Changes to Remote Git Repo
+
+# Prerequisites:
+#   Secret: SSH_PRIVATE_KEY
+#   Env Variables: REMOTE_HOST_NAME, REMOTE_URL
+# Credits: https://maxschmitt.me/posts/github-actions-ssh-key/  
+
+on:
+  push:
+    branches:
+      - dev
+      - qa
+      - main
+jobs:
+  sync-to-remote:
+    runs-on: ubuntu-latest
+    env:
+      REMOTE_HOST_NAME: ssh.dev.azure.com
+      REMOTE_URL: git@ssh.dev.azure.com:v3/EXAMPLE_REPO
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup SSH Keys
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p /home/runner/.ssh
+          ssh-keyscan $REMOTE_HOST_NAME >> /home/runner/.ssh/known_hosts
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /home/runner/.ssh/github_actions
+          chmod 600 /home/runner/.ssh/github_actions
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null   
+          ssh-add /home/runner/.ssh/github_actions
+
+      - name: Configure Git Remote and Push
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          git config --global user.email "no-reply@voicefoundry.com"
+          git config --global user.name "VoiceFoundry GitHub Actions"
+          git remote add client $REMOTE_URL
+          echo "branch is ${GITHUB_REF##*/}"
+          git push client ${GITHUB_REF##*/}
+
