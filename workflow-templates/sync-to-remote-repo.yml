@@ -7,10 +7,11 @@ name: Sync Changes to Remote Git Repo
 
 on:
   push:
-    branches:
+    branches:                                               #MODIFY ME
       - dev
       - qa
       - main
+      - master
 jobs:
   sync-to-remote:
     runs-on: ubuntu-latest
