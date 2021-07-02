@@ -15,8 +15,8 @@ jobs:
   sync-to-remote:
     runs-on: ubuntu-latest
     env:
-      REMOTE_HOST_NAME: ssh.dev.azure.com
-      REMOTE_URL: git@ssh.dev.azure.com:v3/EXAMPLE_REPO
+      REMOTE_HOST_NAME: ssh.dev.azure.com                   #REPLACE ME
+      REMOTE_URL: git@ssh.dev.azure.com:v3/EXAMPLE_REPO     #REPLACE ME
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -43,4 +43,3 @@ jobs:
           git remote add client $REMOTE_URL
           echo "branch is ${GITHUB_REF##*/}"
           git push client ${GITHUB_REF##*/}
-
