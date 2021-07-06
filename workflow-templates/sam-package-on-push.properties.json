@@ -1,0 +1,5 @@
+{
+  "name": "SAM Package on Push",
+  "description": "On push, configure AWS SAM & CLI, run build and package script.",
+  "iconName": "package"
+}

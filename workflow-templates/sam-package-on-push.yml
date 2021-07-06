@@ -1,0 +1,51 @@
+name: SAM Package on Push
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup nodejs
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    # Required by SAM
+    - name: Setup Python
+      uses: actions/setup-python@v2
+
+    - name: Setup SAM
+      uses: aws-actions/setup-sam@v1
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    # Ensure version updated to avoid overwrite
+    - name: Is Version Incremented?
+      run: |
+        cd packaging-pipeline
+        . ./verify-version-file.sh
+        cd ..
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build Packages
+      run: npm run build
+    
+    # Packages that include lambdas must be packaged per region. See vf-agent-desktop repo for examples.
+    - name: Publish Packages
+      run: sam package ...          #CHANGE ME

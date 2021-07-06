@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Setup nodejs
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+
+    - name: Install Dependencies
+      run: |
+        npm config set //npm.pkg.github.com/:_authToken=${{secrets.NPM_TOKEN}}            #Required when using private packages
+        npm ci
+
+    - name: Deploy to Prod
+      run: npm run deploy-prod:ci
+
+    - name: Slack Notification
+      uses: rtCamp/action-slack-notify@v2
+      env:
+        SLACK_CHANNEL: connect-feeds
+        SLACK_COLOR: ${{ job.status }}
+        SLACK_MESSAGE: 'CCSync API has been deployed :rocket:'
+        SLACK_TITLE: CCSync API
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      if: success()

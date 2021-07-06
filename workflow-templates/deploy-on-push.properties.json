@@ -1,0 +1,5 @@
+{
+  "name": "Deploy on Push",
+  "description": "On push, configure AWS CLI, run deploy script, and notify slack.",
+  "iconName": "install"
+}
