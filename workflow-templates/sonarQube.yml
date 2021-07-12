@@ -36,4 +36,4 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         with:
           args: >
-            -Dsonar.projectKey=$GITHUB_REPOSITORY
+            -Dsonar.projectKey=${{ github.event.repository.name }}
