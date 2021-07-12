@@ -1,0 +1,5 @@
+{
+  "name": "Run Sonar Scanner",
+  "description": "On commit to primary branch, run the SonarQube scanner",
+  "iconName": "sonarqube"
+}

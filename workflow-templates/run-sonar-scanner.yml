@@ -1,0 +1,39 @@
+name: Run Sonar Scanner
+
+# You must install dependencies before running scanner.
+
+on:
+  push:
+    branches:
+      - main                # SonarQube Community edition can only scan the default branch
+    paths-ignore:
+      - "**.md"
+
+jobs:
+  sonar-cube:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of SonarQube reporting
+          fetch-depth: 0
+
+      - name: Setup nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+          
+      # Assuming project.json in root. Be sure to install dependencies for all projects in repo.
+      - name: Install Dependencies
+        run: npm install
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectKey=$GITHUB_REPOSITORY
