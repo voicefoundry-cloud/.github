@@ -1,0 +1,5 @@
+{
+  "name": "Sync Changes to CodeCommit",
+  "description": "On push, uses IAM role and OIDC to sync changes to a remote git repository.",
+  "iconName": "sync"
+}

@@ -1,0 +1,83 @@
+name: Sync Changes to CodeCommit
+
+# Prerequisites:
+# Configure a GitHub OIDC Provider: https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+# Create an IAM Role (see below)
+
+# TODO: Update your sync branches here
+on:
+  push:
+    branches:
+      - dev
+      - qa
+      - main
+
+# TODO: Change Region & Role
+env:
+  REGION: us-west-2
+  ROLE_ARN: arn:aws:iam::999999999999:role/YOUR_ROLE
+
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read # This is required for actions/checkout
+
+jobs:
+  build:
+    name: Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.REGION }}
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-duration-seconds: 900
+
+      - name: Configure Git Remote and Push
+        run: |
+          git config --global user.email "no-reply@ttecdigital.com"
+          git config --global user.name "TTEC Digital GitHub Actions"
+          git config --global credential.helper '!aws codecommit credential-helper $@'
+          git config --global credential.UseHttpPath true
+
+          git remote add codecommit https://git-codecommit.${{ env.REGION }}.amazonaws.com/v1/repos/${{github.event.repository.name}}
+          echo "branch is ${{github.head_ref}}"
+          git push codecommit ${{github.head_ref}}
+
+# IAM Role Sample
+# Type: AWS::IAM::Role
+# Properties:
+#   AssumeRolePolicyDocument:
+#     Statement:
+#       - Action: sts:AssumeRoleWithWebIdentity
+#         Condition:
+#           StringEquals:
+#             token.actions.githubusercontent.com:aud: sts.amazonaws.com
+#           StringLike:
+#             token.actions.githubusercontent.com:sub: repo:voicefoundry-cloud/YOUR_REPO:*
+#         Effect: Allow
+#         Principal:
+#           Federated:
+#             Fn::Sub: arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com
+#     Version: '2012-10-17'
+
+# IAM Role Policy Sample
+# PolicyDocument:
+#   Statement:
+#     - Action:
+#         - codecommit:GitPull
+#         - codecommit:GitPush
+#       Effect: Allow
+#       Resource:
+#         Fn::Sub: arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:YOUR_REPO

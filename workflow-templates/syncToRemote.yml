@@ -1,13 +1,13 @@
-name: Sync Changes to Remote Git Repo
+name: Sync Changes to Remote Git Repo using SSH
 
 # Prerequisites:
 #   Secret: SSH_PRIVATE_KEY
 #   Env Variables: REMOTE_HOST_NAME, REMOTE_URL
-# Credits: https://maxschmitt.me/posts/github-actions-ssh-key/  
+# Credits: https://maxschmitt.me/posts/github-actions-ssh-key/
 
 on:
   push:
-    branches:                                               #MODIFY ME
+    branches: #MODIFY ME
       - dev
       - qa
       - main
@@ -16,8 +16,8 @@ jobs:
   sync-to-remote:
     runs-on: ubuntu-latest
     env:
-      REMOTE_HOST_NAME: ssh.dev.azure.com                   #REPLACE ME
-      REMOTE_URL: git@ssh.dev.azure.com:v3/EXAMPLE_REPO     #REPLACE ME
+      REMOTE_HOST_NAME: ssh.dev.azure.com #REPLACE ME
+      REMOTE_URL: git@ssh.dev.azure.com:v3/EXAMPLE_REPO #REPLACE ME
     steps:
       - name: Checkout
         uses: actions/checkout@v2
